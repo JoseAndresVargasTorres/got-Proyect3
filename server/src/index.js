@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 
 // Settings
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 3306);
 
 // Middlewares -> Funciones que se ejecutan antes de procesar algo
 app.use(express.json());
