@@ -1,3 +1,0 @@
-/home/josev/Downloads/Got-SVN-master/cmake-build-debug/_deps/curl-subbuild/CMakeFiles/curl-populate.dir
-/home/josev/Downloads/Got-SVN-master/cmake-build-debug/_deps/curl-subbuild/CMakeFiles/edit_cache.dir
-/home/josev/Downloads/Got-SVN-master/cmake-build-debug/_deps/curl-subbuild/CMakeFiles/rebuild_cache.dir
