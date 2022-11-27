@@ -1,0 +1,21 @@
+# ninja log v5
+0	5	1669587190206075079	zlib-populate-prefix/src/zlib-populate-stamp/zlib-populate-mkdir	761727f8fd36ed23
+0	5	1669587190206075079	/home/josev/Downloads/Got-SVN-master/cmake-build-debug/_deps/zlib-subbuild/zlib-populate-prefix/src/zlib-populate-stamp/zlib-populate-mkdir	761727f8fd36ed23
+5	2971	1669587193170054531	zlib-populate-prefix/src/zlib-populate-stamp/zlib-populate-download	1ae69a73a3b7d61
+5	2971	1669587193170054531	/home/josev/Downloads/Got-SVN-master/cmake-build-debug/_deps/zlib-subbuild/zlib-populate-prefix/src/zlib-populate-stamp/zlib-populate-download	1ae69a73a3b7d61
+2971	2978	0	zlib-populate-prefix/src/zlib-populate-stamp/zlib-populate-update	3bfa6275fc814db
+2971	2978	0	/home/josev/Downloads/Got-SVN-master/cmake-build-debug/_deps/zlib-subbuild/zlib-populate-prefix/src/zlib-populate-stamp/zlib-populate-update	3bfa6275fc814db
+2978	2981	1669587193182054449	zlib-populate-prefix/src/zlib-populate-stamp/zlib-populate-patch	da6a70bcf82d73db
+2978	2981	1669587193182054449	/home/josev/Downloads/Got-SVN-master/cmake-build-debug/_deps/zlib-subbuild/zlib-populate-prefix/src/zlib-populate-stamp/zlib-populate-patch	da6a70bcf82d73db
+2981	2984	1669587193186054422	zlib-populate-prefix/src/zlib-populate-stamp/zlib-populate-configure	4fdb9d7b1aaa20b6
+2981	2984	1669587193186054422	/home/josev/Downloads/Got-SVN-master/cmake-build-debug/_deps/zlib-subbuild/zlib-populate-prefix/src/zlib-populate-stamp/zlib-populate-configure	4fdb9d7b1aaa20b6
+2984	2987	1669587193186054422	zlib-populate-prefix/src/zlib-populate-stamp/zlib-populate-build	b90b6968383d713c
+2984	2987	1669587193186054422	/home/josev/Downloads/Got-SVN-master/cmake-build-debug/_deps/zlib-subbuild/zlib-populate-prefix/src/zlib-populate-stamp/zlib-populate-build	b90b6968383d713c
+2987	2990	1669587193190054394	zlib-populate-prefix/src/zlib-populate-stamp/zlib-populate-install	70aace4f9afd32e8
+2987	2990	1669587193190054394	/home/josev/Downloads/Got-SVN-master/cmake-build-debug/_deps/zlib-subbuild/zlib-populate-prefix/src/zlib-populate-stamp/zlib-populate-install	70aace4f9afd32e8
+2990	2993	1669587193194054366	zlib-populate-prefix/src/zlib-populate-stamp/zlib-populate-test	1f894ff0780d8b78
+2990	2993	1669587193194054366	/home/josev/Downloads/Got-SVN-master/cmake-build-debug/_deps/zlib-subbuild/zlib-populate-prefix/src/zlib-populate-stamp/zlib-populate-test	1f894ff0780d8b78
+2993	2998	1669587193198054338	CMakeFiles/zlib-populate-complete	dd16e5e3467c22ab
+2993	2998	1669587193198054338	zlib-populate-prefix/src/zlib-populate-stamp/zlib-populate-done	dd16e5e3467c22ab
+2993	2998	1669587193198054338	/home/josev/Downloads/Got-SVN-master/cmake-build-debug/_deps/zlib-subbuild/CMakeFiles/zlib-populate-complete	dd16e5e3467c22ab
+2993	2998	1669587193198054338	/home/josev/Downloads/Got-SVN-master/cmake-build-debug/_deps/zlib-subbuild/zlib-populate-prefix/src/zlib-populate-stamp/zlib-populate-done	dd16e5e3467c22ab

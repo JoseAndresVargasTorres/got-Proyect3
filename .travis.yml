@@ -1,0 +1,60 @@
+language: cpp
+os: linux
+compiler: gcc
+
+addons:
+  sonarcloud:
+    organization: "simonfv"
+  token:
+    secure: "Ttxgpzj8tX8slcGVuxQxvdNmP4fcjmJp1g9vxTHT/WdbpUmZRcMEPJPSTzZbxx+poxpmvwHRzNKR4ql8MRJ74OiSVMXRIwmZlF52saQ8ISYMdQlGOjzZv45fENXad4EBmgT2+w+ycVPcTZBnWaXQMKeYLkwbvNV40JB7DAOhgZlTi6WZjEeuel9JRAV8ffVjlUg2v04wUC07vt55xN+FUXHpQCBOINjvbXfIVuZ7YfapLTaSUPw46Idk7uYOQ1cI1DMkeHnxepI5FVewC9N22OqGVsmZ6UAr1e6yMYAeZyXr1HwXSkZO/BwEvn50Z2dK99TPYx/4JszqMyEmTiKCp5ZgpaDHG3hY9S8+wQmZRLYAS+pC2we6IM0YA688S227bbILR5ALd+VXBcXgx8AEhwHG+qZSoWwI1DFxabsOS2vQ/m+Ids8EfxgIJRmX8Z3EmD8yjhwp8Js8NRoz4HBgizFvtp3XCeLZBbm9VaihERju9hkhVCts9rVyZOTMHivfi+4ZZ5JVcFcmu1BudBKQaXQOI915Xa2kdL4i8MJDkN6v9UCKhEqob887tm721RM+M0A+9Oxx4hc4uRoPXjoFuW0kbxp1ySXsMolUwEyIyJLKamus/SahKAhI0WzP4HNTewun9aRH2uWCxTvV3hHldwaCRgklIesB70n95G9uX2A="
+  apt:
+    packages:
+      - gcc-4.8
+      - g++-4.8
+      
+install:
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8 -std=c++11 -DENABLE_REINFORCEMENT_LEARNING" CC="gcc-4.8"; fi
+  - sudo apt-get -y install libjsoncpp-dev
+  # first we create a directory for the CMake binaries
+  # first we create a directory for the CMake binaries
+  - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
+  - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
+  # we use wget to fetch the cmake binaries
+  - travis_retry wget --no-check-certificate https://cmake.org/files/v3.15/cmake-3.15.2-Linux-x86_64.tar.gz
+  # extract the binaries; the output here is quite lengthy,
+  # so we swallow it to not clutter up the travis console
+  - tar -xvf cmake-3.15.2-Linux-x86_64.tar.gz > /dev/null
+  - mv cmake-3.15.2-Linux-x86_64 cmake-install
+  # add both the top-level directory and the bin directory from the archive
+  # to the system PATH. By adding it to the front of the path we hide the
+  # preinstalled CMake with our own.
+  - PATH=${DEPS_DIR}/cmake-install:${DEPS_DIR}/cmake-install/bin:$PATH
+  # don't forget to switch back to the main build directory once you are done
+  - cd ${TRAVIS_BUILD_DIR}
+  - PATH=$PATH:/usr/include/jsoncpp/json/:/usr/include/json/:$PATH
+  - LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/include/jsoncpp/json/:/usr/include/json/:$PATH
+  - DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/usr/include/jsoncpp/json/:/usr/include/json/:$PATH
+  - - sudo ln -s /usr/include/jsoncpp/json/ /usr/include/json
+  
+
+script:
+  # Adds the necesary libraries
+  - cd client
+  - git clone https://github.com/gabime/spdlog.git
+  - git clone https://github.com/whoshuu/cpr.git
+  # Prepare the build 
+  - cd ..
+  - mkdir build && cd build
+  - cmake ..
+  - cd ..
+  # Wraps the compilation with the Build Wrapper to generate configuration (used
+  # later by the SonarQube Scanner) into the "bw-output" folder
+  - build-wrapper-linux-x86-64 --out-dir bw-output cmake --build build/
+  # And finally run the SonarQube analysis - read the "sonar-project.properties"
+  # file to see the specific configurations
+  - sonar-scanner
+
+
+cache:
+  directories:
+    - '$HOME/.sonar/cache'
