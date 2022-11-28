@@ -227,16 +227,4 @@ router.put('/:id_diff', (req, res) => {
   });
 });
 
-// DELETE An Employee
-/*router.delete('/:id', (req, res) => {
-  const { id } = req.params;
-  mysqlConnection.query('DELETE FROM employee WHERE id = ?', [id], (err, rows, fields) => {
-    if(!err) {
-      res.json({status: 'Employee Deleted'});
-    } else {
-      console.log(err);
-    }
-  });
-});*/
-
 module.exports = router;

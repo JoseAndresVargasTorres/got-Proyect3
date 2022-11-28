@@ -6,16 +6,14 @@ using namespace std;
 
 string Command::thisPath = "";
 
-string Command::diff_a_string()
-{
+string Command::diff_a_string() {
 
     fstream ficheroEntrada;
     string linea_texto = "";
     string texto_final = "";
 
     ficheroEntrada.open(Command::thisPath + "../repo/.got/test.patch", ios::in);
-    if (ficheroEntrada.is_open())
-    {
+    if (ficheroEntrada.is_open()) {
         while (!ficheroEntrada.eof())
         {
             getline(ficheroEntrada, linea_texto);
@@ -23,32 +21,31 @@ string Command::diff_a_string()
         }
         ficheroEntrada.close();
     }
-    else
-    {
+    else {
         spdlog::error("Fichero inexistente o faltan permisos para abrirlo (Diff)");
     }
     texto_final.erase(texto_final.size() - 1);
     return texto_final;
 }
 
-void Command::diff_sync(string fileAfter, string fileBefore, string patch)
-{
+// Funciones para mostrar la diferencia entre dos versiones de un archivo
+void Command::diff_sync(string fileAfter, string fileBefore, string patch) {
     string command = "diff -DVERSION1 " + fileBefore + " " + fileAfter + " > " + patch;
     int sin_uso = system(command.c_str());
 }
 
-void Command::diff(string fileAfter, string fileBefore, string patch)
-{
+void Command::diff(string fileAfter, string fileBefore, string patch){
     string command = "diff -e " + fileBefore + " " + fileAfter + " > " + patch;
     int sin_uso = system(command.c_str());
 }
 
-void Command::applyChanges(string original, string changes)
-{
+//
+void Command::applyChanges(string original, string changes){
     string command = "patch " + original + " " + changes;
     int sin_uso = system(command.c_str());
 }
 
+// Función para obtener el path de la carpeta donde me encuentro
 string Command::get_selfpath()
 {
     char result[PATH_MAX];
@@ -56,8 +53,8 @@ string Command::get_selfpath()
     return std::string(result, (count > 0) ? count : 0);
 }
 
-void Command::updateIgnore()
-{
+
+void Command::updateIgnore(){
     ifstream ifs(Command::thisPath + ".got/control_cliente.json");
     Json::Reader reader;
     Json::Value root;
@@ -77,17 +74,16 @@ void Command::updateIgnore()
     ifs.close();
 }
 
-void Command::init(string repoName)
-{
-    if (mkdir(".got", 0777) == -1)
-    {
+// Función para inicializar un repositorio
+void Command::init(string repoName){
+    //Crear una carpeta oculta .got
+    if (mkdir(".got", 0777) == -1){
         spdlog::error("Error : {}", strerror(errno));
-    }
-    else
-    {
+    } else {
         spdlog::info("Directorio .got creado");
     }
 
+    // Crear un archivo .gotignore donde se guardan los archivos ignorados
     ofstream file;
     file.open(thisPath + ".gotignore");
     string mensaje = "PARA IGNORAR CARPETAS: <carpeta>/\nPARA IGNORAR ARCHIVOS: <archivo>.<extension>\n";
@@ -96,7 +92,7 @@ void Command::init(string repoName)
     file.close();
     spdlog::info("Agregado el archivo .gotignore");
 
-    //Agrega los archivos JSON
+    //Agregar los archivos JSON para comunicación con la base de datos
     file.open(thisPath + ".got/enviado.json");
     file.close();
     file.open(thisPath + ".got/recibido.json");
@@ -104,39 +100,28 @@ void Command::init(string repoName)
     file.open(thisPath + ".got/control_cliente.json");
     file.close();
 
-    // Crea la estructura control cliente-server
-    Json::Value root;
-    root["id_repositorio"] = 0;
-    root["commit"] = 0;
-    root["hash_commit"] = "";
-    root["archivos"];
-    Control::escribir_json(".got/control_cliente.json", root);
+    // Crea un json con el protocolo de comunicación entre cliente y servidor
+    Json::Value control;
+    control["id_repositorio"] = 0;
+    control["commit"] = 0;
+    control["hash_commit"] = "";
+    control["archivos"];
+    Control::escribir_json(".got/control_cliente.json", control);
 
-    // Agregar directorios al json
+    // Añade los archivos al json
     const char *dir_name = thisPath.c_str();
     Control::list_dir(dir_name);
 
     // Escribe la estructura repositorio y envia datos
-    Json::Value root0;
-    root0["nombre_repositorio"] = repoName;
-    Control::escribir_json(".got/enviado.json", root0);
+    Json::Value enviado;
+    enviado["nombre_repositorio"] = repoName;
+    Control::escribir_json(".got/enviado.json", enviado);
     Client::getI()->POST("repositorio", thisPath + ".got/enviado.json");
     spdlog::info("Repositorio agregado en el server!");
     spdlog::info(Client::getI()->getStatus());
-
-    // Guardar el # del repositorio
-    string dato_retornado = Control::leer_json(".got/recibido.json", "id_repositorio");
-    // Leer archivo para acualizarlo
-    ifstream ifs1(Command::thisPath + ".got/control_cliente.json");
-    Json::Reader reader1;
-    Json::Value root1;
-    reader1.parse(ifs1, root1);
-    root1["id_repositorio"] = dato_retornado;
-    Control::escribir_json(".got/control_cliente.json", root1);
 }
 
-void Command::add(string solicitud_archivos)
-{
+void Command::add(string solicitud_archivos){
     // Antes de agregar los archivos, actualizar directorio
     const char *dir_name = thisPath.c_str();
     Control::list_dir(dir_name);
@@ -170,39 +155,32 @@ void Command::add(string solicitud_archivos)
             }
         }
     }
-    else
-    {
+    else{
         //Agregar uno
-        if (root["archivos"][solicitud_archivos] == "no_controlado")
-        {
+        if (root["archivos"][solicitud_archivos] == "no_controlado"){
             root["archivos"][solicitud_archivos] = "agregado";
             spdlog::info("Archivo agregado!");
         }
-        else if (root["archivos"][solicitud_archivos] == "server")
-        {
+        else if (root["archivos"][solicitud_archivos] == "server"){
             root["archivos"][solicitud_archivos] = "modificado";
             spdlog::info("El archivo ha sido modificado!");
         }
-        else if (root["archivos"][solicitud_archivos] == "agregado")
-        {
+        else if (root["archivos"][solicitud_archivos] == "agregado"){
             spdlog::info("El archivo ya ha sido agregado!");
         }
-        else
-        {
+        else{
             archivo_existente = false;
             spdlog::info("El archivo no existe!");
         }
     }
 
-    if (archivo_existente == true)
-    {
+    if (archivo_existente == true){
         Control::escribir_json(".got/control_cliente.json", root);
     }
     ifs.close();
 }
 
-void Command::commit(string comentario)
-{
+void Command::commit(string comentario){
 
     // Guardar el # repo actual
     string repo_actual = Control::leer_json(".got/control_cliente.json", "id_repositorio");
@@ -242,11 +220,9 @@ void Command::commit(string comentario)
     string sim_cod = "";
     string temporal_ascii_texto = "";
     string temporal_texto_ascii = "";
-    for (Json::Value::const_iterator it = root1[aux].begin(); it != root1[aux].end(); ++it)
-    {
+    for (Json::Value::const_iterator it = root1[aux].begin(); it != root1[aux].end(); ++it){
 
-        if (root1["archivos"][it.key().asString()] == "agregado")
-        {
+        if (root1["archivos"][it.key().asString()] == "agregado"){
             // Comprimir datos
             texto_final = generar_string_de_archivo(Command::thisPath + it.key().asString());
             buildHuffmanTree(texto_final);
@@ -272,11 +248,9 @@ void Command::commit(string comentario)
             root1["archivos"][it.key().asString()] = "server";
             Control::escribir_json(".got/control_cliente.json", root1);
         }
-        else if (root1["archivos"][it.key().asString()] == "modificado")
-        {
+        else if (root1["archivos"][it.key().asString()] == "modificado"){
             string comparacion_diff = "";
-            if (relacion_actual_commit == 2)
-            {
+            if (relacion_actual_commit == 2){
                 spdlog::info("Agregando diff's del commit 2!");
                 // Pedir Huffman del commit 1
                 Json::Value root3;
@@ -305,8 +279,7 @@ void Command::commit(string comentario)
 
                 comparacion_diff = Command::diff_a_string();
             }
-            else
-            {
+            else{
                 spdlog::info("Agregando diff's del commit > 2!");
                 // Pedir diferencias (diff anterior)
                 // Escribe la estructura diff_anterior y envia datos
@@ -342,12 +315,10 @@ void Command::commit(string comentario)
             }
 
             // Si el archivo .patch esta en blanco, no hay diferencia
-            if (comparacion_diff == "")
-            {
+            if (comparacion_diff == ""){
                 spdlog::info("No hay cambios en el archivo!");
             }
-            else
-            {
+            else{
                 // Sacar MD5
                 string codigo_checksum = md5(to_string(relacion_actual_commit));
 
@@ -376,20 +347,17 @@ void Command::commit(string comentario)
     ifs1.close();
 }
 
-void Command::status(string archivo)
-{
+void Command::status(string archivo){
     vector<pair<string, string>> vect_historial_archivos;
 
-    if (archivo == "")
-    {
+    if (archivo == ""){
         // Leer control_cliente.json
         ifstream ifs(Command::thisPath + ".got/control_cliente.json");
         Json::Reader reader;
         Json::Value root;
         reader.parse(ifs, root);
         string aux = "archivos";
-        for (Json::Value::const_iterator it = root[aux].begin(); it != root[aux].end(); ++it)
-        {
+        for (Json::Value::const_iterator it = root[aux].begin(); it != root[aux].end(); ++it){
             if (root["archivos"][it.key().asString()] == "no_controlado" || root["archivos"][it.key().asString()] == "agregado")
             {
                 spdlog::info("El archivo " + it.key().asString() + " ha sido agregado respecto al commit anterior");
@@ -400,13 +368,11 @@ void Command::status(string archivo)
             }
         }
     }
-    else
-    {
+    else{
         // Guardar el # commit actual
         int commit_anterior = stoi(Control::leer_json(".got/control_cliente.json", "commit"));
         string archivo_retornado;
-        while (commit_anterior > 0)
-        {
+        while (commit_anterior > 0){
             // Pedir archivo agregado del commit anterior
             Json::Value root3;
             root3["id_commit"] = commit_anterior;
@@ -418,12 +384,10 @@ void Command::status(string archivo)
 
             // Guardar si/no esta generado
             archivo_retornado = Control::leer_json(".got/recibido.json", "existencia");
-            if (archivo_retornado == "si")
-            {
+            if (archivo_retornado == "si"){
                 vect_historial_archivos.push_back(make_pair(to_string(commit_anterior), "agregado"));
             }
-            else
-            {
+            else{
                 // Pedir archivo modificado del commit anterior
                 Json::Value root4;
                 root4["id_commit"] = commit_anterior;
@@ -446,21 +410,18 @@ void Command::status(string archivo)
     }
 
     // Mostrar los archivos agregados/modificados
-    for (int i = 0; i < vect_historial_archivos.size(); i++)
-    {
+    for (int i = 0; i < vect_historial_archivos.size(); i++){
         spdlog::info("En el commit # " + vect_historial_archivos[i].first + " el archivo " + archivo + " fue " + vect_historial_archivos[i].second);
     }
 }
 
-void Command::log()
-{
+void Command::log(){
 
     // Guardar el # commit actual
     int commit_anterior = stoi(Control::leer_json(".got/control_cliente.json", "commit"));
     string hash_retornado;
     string comentario_retornado;
-    while (commit_anterior != 0)
-    {
+    while (commit_anterior != 0){
 
         // Pedir hash's
         Client::getI()->GET("hash_comentario/" + to_string(commit_anterior), thisPath + ".got/enviado.json");
@@ -480,17 +441,14 @@ void Command::log()
     }
 }
 
-void Command::rollback(string archivo, string commit, bool ruta_externa)
-{
+void Command::rollback(string archivo, string commit, bool ruta_externa){
 
     // Escribe el contenido en ruta actual o temporal
     string ruta = "";
-    if (ruta_externa)
-    {
+    if (ruta_externa){
         ruta = Command::thisPath + "../repo/.got/test.txt";
     }
-    else
-    {
+    else{
         ruta = Command::thisPath + archivo;
     }
 
@@ -530,14 +488,12 @@ void Command::rollback(string archivo, string commit, bool ruta_externa)
     fs << descomprimir_data(dato_retornado, temporal_texto_ascii);
     fs.close();
 
-    if (stoi(commit) > 1)
-    {
+    if (stoi(commit) > 1){
         // Aplicar diff hasta el commit pedido
         int commit_pedido = stoi(commit);
         int commit_actual = 2;
         string diff_retornado;
-        while (commit_actual <= commit_pedido)
-        {
+        while (commit_actual <= commit_pedido){
             // Pedir diferencias (diff)
             // Escribe la estructura diff_anterior y envia datos
             Json::Value root2;
@@ -568,8 +524,7 @@ void Command::rollback(string archivo, string commit, bool ruta_externa)
     }
 }
 
-void Command::reset(string archivo)
-{
+void Command::reset(string archivo){
 
     // Guardar el # commit actual
     string commit_retornado = Control::leer_json(".got/control_cliente.json", "commit");
@@ -578,8 +533,7 @@ void Command::reset(string archivo)
     Command::rollback(archivo, commit_retornado, false);
 }
 
-void Command::sync(string archivo)
-{
+void Command::sync(string archivo){
     // Guardar el # repositorio actual
     string repositorio_retornado = Control::leer_json(".got/control_cliente.json", "id_repositorio");
 
@@ -608,12 +562,10 @@ void Command::sync(string archivo)
 
     // Si hay cambios se aplica sync
     // Si el archivo .patch esta en blanco, no hay diferencia
-    if (comparacion_diff == "")
-    {
+    if (comparacion_diff == ""){
         spdlog::info("No hay cambios en el archivo!");
     }
-    else
-    {
+    else{
         // Sincroniza los dos archivos
         Command::diff_sync(Command::thisPath + archivo,
                            Command::thisPath + "../repo/.got/test.txt",

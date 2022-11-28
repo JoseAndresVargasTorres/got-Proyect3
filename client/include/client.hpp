@@ -33,7 +33,7 @@ private:
      */
     Client()
     {
-        url = "http://localhost:3000/";
+        url = "http://localhost:3306/";
         post_body = "";
         received_body = "";
         status_response = 0;
